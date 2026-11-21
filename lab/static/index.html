@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11151d"><title>Tapclap Lab · Game QA</title>
+  <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#overview"><span class="brand-mark">T<span>↗</span></span><span>tapclap<span class="brand-lab"> / lab</span><small>GAME QUALITY WORKSPACE</small></span></a>
+    <p class="nav-label">РАБОЧАЯ ОБЛАСТЬ</p>
+    <nav aria-label="Основная навигация">
+      <a href="#overview" data-nav="overview" class="active"><span>◈</span> Обзор и запуск</a>
+      <a href="#history" data-nav="history"><span>◷</span> История прогонов</a>
+      <a href="#stability" data-nav="stability"><span>⌁</span> Стабильность</a>
+      <a href="#calibration" data-nav="calibration"><span>⌖</span> Калибровка Canvas</a>
+      <a href="#schedules" data-nav="schedules"><span>▦</span> Расписание</a>
+    </nav>
+    <div class="sidebar-bottom"><span class="dot"></span> <span id="connection">Подключение…</span><p>Один браузерный worker<br>Реальные результаты проверок</p><span class="version">WORKSPACE / v1.0</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span class="breadcrumb">Проекты <span>/</span> <strong>Сокровища пиратов</strong></span><div class="header-actions"><a href="https://gems2-testers.stand.tapclap.com/" target="_blank" rel="noreferrer">Открыть стенд ↗</a><span id="role" class="pill">Просмотр</span><button id="authButton" class="button small secondary">Войти</button></div></header>
+    <main>
+      <section data-page="overview" class="page">
+        <div class="page-heading"><div><p class="eyebrow">BROWSER AUTOMATION / CANVAS</p><h1>Всё о качестве игры.<br><span>В одном месте.</span></h1><p class="subtitle">Запускай проверки, следи за игровым экраном и разбирай каждый результат.</p></div><div class="project-badge"><span class="gem">◆</span><div>Сокровища пиратов<small>Тестовый стенд TAPCLAP</small><span class="pill subtle">WEB · BLACK BOX</span></div></div></div>
+        <div class="metrics"><article><p>Всего прогонов <span>↗</span></p><strong id="metricTotal">0</strong><small>Последние 500 прогонов</small></article><article><p>Успешных <span class="green">✓</span></p><strong id="metricPassed">0</strong><small>Прогоны со статусом passed</small></article><article><p>Требуют внимания <span class="amber">!</span></p><strong id="metricFailed">0</strong><small>Failed, error или interrupted</small></article><article><p>Очередь <span>≡</span></p><strong id="metricQueued">0</strong><small id="workerStatus">Worker свободен</small></article></div>
+        <div class="run-grid">
+          <section class="panel config-panel"><div class="panel-heading"><h2>Новый прогон</h2><span class="tag">CONFIG</span></div>
+            <form id="runForm"><label>Браузер<select id="browser"><option value="chromium">Chromium</option><option value="firefox">Firefox</option><option value="webkit">WebKit</option></select></label>
+              <label>Устройство<select id="profile"><option value="desktop">Desktop · 1280 × 720</option><option value="mobile">Mobile · 390 × 844</option><option value="tablet">Tablet · 820 × 1180</option></select></label>
+              <div class="two-columns"><label>Повторы<input id="repeat" type="number" min="1" max="10" value="1"></label><label>Таймаут, с<input id="timeout" type="number" min="15" max="180" value="90"></label></div>
+              <div class="test-label"><span>Набор проверок</span><button type="button" id="selectSmoke" class="text-button">Smoke</button></div><div id="testPicker" class="test-picker"></div>
+              <p class="hint">Mobile — эмуляция viewport и touch, не реальный телефон. Firefox: viewport без is_mobile.</p>
+              <button type="submit" class="button primary full" id="launchButton">▶ &nbsp; Запустить проверки</button><p class="config-footnote" id="launchHint">Запуск доступен администратору</p>
+            </form>
+          </section>
+          <div class="monitor-stack">
+            <section class="panel monitor"><div class="panel-heading"><div class="title-with-dot"><span class="dot" id="liveDot"></span><h2>Экран прогона</h2><span id="runStatus" class="pill">Нет запуска</span></div><button id="stopButton" class="button danger small" disabled>■ Остановить</button></div>
+              <div class="monitor-toolbar"><div class="segments"><button data-monitor="snapshot" class="selected">Скриншоты</button><button data-monitor="stream">Трансляция</button><button data-monitor="video">Запись</button></div><span id="runMeta" class="mono">Ожидание запуска</span></div>
+              <div class="screen" id="screen"><div id="screenEmpty" class="empty-screen"><span class="screen-icon">⌖</span><h3>Здесь появится игра</h3><p>Выбери проверки и запусти прогон.<br>Кадры поступают из настоящего браузера.</p></div><img id="liveImage" alt="Текущий экран браузера" hidden><video id="runVideo" controls preload="metadata" hidden></video><span class="screen-caption" id="screenCaption" hidden>LIVE VIEW</span></div>
+              <div class="monitor-footer"><span id="currentStep">Worker готов к работе</span><span id="frameInfo">—</span></div><select id="videoSelect" aria-label="Видеозапись теста" hidden></select>
+            </section>
+            <section class="panel results-panel"><div class="panel-heading"><h2>Выполнение проверок</h2><div class="result-links" id="resultLinks"></div></div><div class="progress-track"><span id="progressFill"></span></div><div id="testResults" class="results-empty">Результаты появятся после запуска. Демонстрационные данные не используются.</div><div id="runSummary" class="run-summary" hidden></div></section>
+          </div>
+        </div>
+        <section class="panel log-panel"><div class="panel-heading"><h2>Журнал событий</h2><span class="tag" id="eventCount">0 EVENTS</span></div><div id="eventLog" class="event-log"><span class="muted">Ожидание событий браузера…</span></div></section>
+      </section>
+
+      <section data-page="history" class="page" hidden><div class="section-heading"><div><p class="eyebrow">RUN ARCHIVE</p><h1>История прогонов</h1><p class="subtitle">Результаты, материалы и сравнение изменений.</p></div><select id="historyFilter" aria-label="Фильтр истории"><option value="all">Все статусы</option><option>passed</option><option>failed</option><option>error</option><option>running</option><option>queued</option><option>cancelled</option><option>interrupted</option></select></div><div class="panel"><div id="historyTable" class="table-scroll"></div></div><section class="panel compare-panel"><div class="panel-heading"><h2>Сравнить два прогона</h2></div><div class="compare-controls"><select id="compareA" aria-label="Первый прогон"></select><span>→</span><select id="compareB" aria-label="Второй прогон"></select><button id="compareButton" class="button secondary">Сравнить</button></div><div id="compareResult" class="muted">Выбери прогоны с одинаковым браузером и профилем для корректного сравнения.</div></section></section>
+
+      <section data-page="stability" class="page" hidden><div class="section-heading"><div><p class="eyebrow">QUALITY SIGNALS</p><h1>Стабильность проверок</h1><p class="subtitle">Процент прохождения и длительность — отдельно для каждого браузера и профиля.</p></div></div><div class="notice">«Нестабилен» означает наличие и passed, и failed в истории. Это сигнал для анализа: причиной может быть как тест, так и изменение игры. Skipped исключены из процента прохождения.</div><div class="panel table-scroll" id="stabilityTable"></div></section>
+
+      <section data-page="calibration" class="page" hidden><div class="section-heading"><div><p class="eyebrow">VISUAL SCENARIOS</p><h1>Калибровка Canvas</h1><p class="subtitle">Преврати реальный игровой экран в проверяемый сценарий.</p></div><button id="captureButton" class="button primary">⌖ Захватить кадр</button></div><div class="notice">Запусти или открой прогон, захвати кадр и выдели устойчивый элемент. Шаблоны привязаны к браузеру и viewport. Для готовности игры используй имя <code>game_ready</code>; для эталона — <code id="baselineName">baseline_desktop_chromium</code> и полный кадр.</div>
+        <div class="calibration-grid"><section class="panel"><div class="panel-heading"><h2>Редактор шаблона</h2><button id="selectFullFrame" class="text-button">Весь кадр</button></div><div class="capture-wrap"><canvas id="captureCanvas" width="1280" height="720" aria-label="Выделите элемент на скриншоте"></canvas><div id="captureEmpty" class="capture-empty">Захвати кадр из выбранного прогона</div></div><div class="capture-controls"><label>Имя шаблона<input id="templateName" placeholder="game_ready" pattern="[a-z][a-z0-9_]{2,47}"></label><button id="saveTemplate" class="button secondary">Сохранить шаблон</button></div><p id="captureInfo" class="hint">Перетащи мышь или палец, чтобы выделить область.</p><div id="templateList" class="template-list"></div></section>
+          <section class="panel scenario-panel"><div class="panel-heading"><h2>Конструктор сценария</h2><span class="tag">NO CODE</span></div><label>Название<input id="scenarioName" placeholder="Открытие настроек игры"></label><div id="scenarioSteps"></div><div class="step-editor"><select id="stepAction" aria-label="Действие"><option value="wait">Ждать шаблон</option><option value="click">Нажать шаблон</option><option value="assert">Проверить шаблон</option><option value="reload">Перезагрузить</option><option value="screenshot">Скриншот</option><option value="drag">Перетащить</option></select><select id="stepTemplate" aria-label="Шаблон"></select><input id="dragCoords" placeholder="x1,y1,x2,y2 · от 0 до 1" hidden><button id="addStep" class="button secondary small">+ Шаг</button></div><p class="hint">Нужен хотя бы один шаг «Проверить шаблон». Drag использует мышь и координаты относительно всего viewport.</p><button id="saveScenario" class="button primary full">Сохранить сценарий</button><div id="scenarioList" class="scenario-list"></div></section></div>
+      </section>
+
+      <section data-page="schedules" class="page" hidden><div class="section-heading"><div><p class="eyebrow">SCHEDULED CHECKS</p><h1>Проверки по расписанию</h1><p class="subtitle">Ежедневные прогоны с текущим набором тестов.</p></div></div><div class="schedule-grid"><section class="panel"><div class="panel-heading"><h2>Новое расписание</h2></div><form id="scheduleForm"><label>Название<input id="scheduleName" value="Ежедневный smoke" maxlength="100"></label><div class="two-columns"><label>Время<input id="scheduleTime" type="time" value="09:00" required></label><label>Часовой пояс<select id="scheduleZone"><option value="240">Тбилиси · UTC+4</option><option value="180">Минск · UTC+3</option><option value="0">UTC</option></select></label></div><p class="hint" id="scheduleOptions">Будет сохранён набор проверок из раздела «Обзор и запуск». Часовой пояс — фиксированное смещение UTC, без перехода на летнее время.</p><button class="button primary full">Создать расписание</button></form></section><section class="panel"><div class="panel-heading"><h2>Активные расписания</h2></div><div id="scheduleList"></div><p class="hint">Сервис должен работать в момент запуска. После простоя выполняется один пропущенный запуск, затем — следующий день.</p></section></div></section>
+      <footer>Tapclap Lab <span>·</span> Независимый инструмент QA <span>·</span> Не является продуктом TAPCLAP</footer>
+    </main>
+  </div>
+  <dialog id="loginDialog"><form id="loginForm"><button id="closeLogin" class="dialog-close" type="button" aria-label="Закрыть">×</button><p class="eyebrow">WORKSPACE ACCESS</p><h2>Вход администратора</h2><p class="muted">Для запуска тестов и изменения настроек.</p><label>Ключ администратора<input type="password" id="adminToken" autocomplete="current-password" required></label><p id="loginError" class="error-text" role="alert"></p><button class="button primary full">Войти</button></form></dialog><div id="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

@@ -1,0 +1,42 @@
+name: Live smoke on Tapclap stand
+on:
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser
+        type: choice
+        options: [chromium, firefox, webkit]
+        default: chromium
+      profile:
+        description: Viewport profile (emulation)
+        type: choice
+        options: [desktop, mobile, tablet]
+        default: desktop
+permissions:
+  contents: read
+concurrency:
+  group: tapclap-live-smoke
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m playwright install --with-deps "$TEST_BROWSER"
+        env:
+          TEST_BROWSER: ${{ inputs.browser }}
+      - run: python scripts/run_smoke.py --browser "$TEST_BROWSER" --profile "$TEST_PROFILE"
+        env:
+          TEST_BROWSER: ${{ inputs.browser }}
+          TEST_PROFILE: ${{ inputs.profile }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tapclap-live-smoke
+          path: test-results/
+          retention-days: 7
